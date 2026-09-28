@@ -41,7 +41,7 @@ class DisplayTest extends TestCase
     {
         $display = (new MomoGateway())->getDisplay();
 
-        $this->assertSame(AbstractGateway::SHOW_ICON, $display['type']);
+        $this->assertSame(AbstractGateway::SHOW_ICON_TEXT, $display['type']);
         $this->assertStringContainsString('<svg', $display['icon']);
         $this->assertSame('MoMo', $display['text']);
         $this->assertSame(AbstractGateway::ICON_LEFT, $display['icon_position']);
