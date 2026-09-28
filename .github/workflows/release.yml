@@ -1,0 +1,74 @@
+name: Release
+
+on:
+  release:
+    types: [created]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      - name: Determine PHP versions
+        id: php
+        run: |
+          CONSTRAINT=""
+          ALL="7.4 8.0 8.1 8.2 8.3 8.4 8.5"
+
+          if [ -z "$CONSTRAINT" ]; then
+            echo "versions=$ALL" >> $GITHUB_OUTPUT
+          else
+            VERSIONS=$(python3 -c "
+          import re
+          constraint = '$CONSTRAINT'.strip()
+          supported = ['7.4', '8.0', '8.1', '8.2', '8.3', '8.4', '8.5']
+          m = re.match(r'[>=~^]+\s*(\d+\.\d+)', constraint)
+          if m:
+              min_ver = m.group(1)
+              print(' '.join(v for v in supported if v >= min_ver))
+          else:
+              print(' '.join(supported))
+          ")
+            echo "versions=$VERSIONS" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build per-PHP assets
+        env:
+          GITHUB_TOKEN: $\{{ secrets.GITHUB_TOKEN }}
+        run: |
+          SLUG="momo-payment-gateway"
+          RELEASE_TAG="$\{{ github.event.release.tag_name }}"
+
+          for php_ver in $\{{ steps.php.outputs.versions }}; do
+            echo "Building for PHP $php_ver..."
+
+            rm -rf libs composer.lock
+
+            if composer install --prefer-dist --no-dev --no-interaction --no-progress 2>/dev/null; then
+              zip_name="${SLUG}.php${php_ver}.zip"
+              zip -r "/tmp/${zip_name}" . \
+                -x ".git/*" ".DS_Store" ".phpunit.result.cache" "tests/*" "node_modules/*"
+
+              gh release upload "$RELEASE_TAG" "/tmp/${zip_name}" --clobber
+              echo "  Uploaded: ${zip_name}"
+            else
+              echo "  WARN: composer install failed for PHP $php_ver, skipping"
+            fi
+          done
+
+          # Generic zip (no vendor)
+          rm -rf libs composer.lock
+          zip -r "/tmp/${SLUG}.zip" . \
+            -x ".git/*" ".DS_Store" ".phpunit.result.cache" "tests/*" "node_modules/*" "libs/*" "libs/*"
+          gh release upload "$RELEASE_TAG" "/tmp/${SLUG}.zip" --clobber
+          echo "  Uploaded: ${SLUG}.zip (generic)"
