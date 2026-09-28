@@ -1,0 +1,26 @@
+{
+    "name": "jankx/momo-payment-gateway",
+    "description": "MoMo payment gateway extension for Jankx Payment System",
+    "type": "wordpress-extension",
+    "require-dev": {
+        "phpunit/phpunit": "^9.5",
+        "brain/monkey": "^2.6",
+        "mockery/mockery": "^1.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "Jankx\\Extensions\\Momo\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Jankx\\Extensions\\Momo\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "vendor-dir": "libs",
+        "allow-plugins": {
+            "php-http/discovery": false
+        }
+    }
+}

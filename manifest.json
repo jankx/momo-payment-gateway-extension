@@ -1,0 +1,16 @@
+{
+    "name": "MoMo Payment Gateway",
+    "description": "MoMo (e-wallet) payment gateway for the payment-system extension. Redirects the customer to the MoMo payment page (captureWallet) and reconciles the result via the MoMo gateway API.",
+    "version": "1.0.0",
+    "author": "Jankx",
+    "extension_id": "momo-payment-gateway",
+    "caller": {
+        "file": "MomoPaymentGatewayExtension.php",
+        "class": "Jankx\\Extensions\\Momo\\MomoPaymentGatewayExtension"
+    },
+    "requirements": {
+        "php": ">=8.0"
+    },
+    "context": ["admin", "frontend", "rest", "ajax"],
+    "auto_activate": true
+}
